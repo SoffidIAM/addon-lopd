@@ -1,0 +1,626 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><?page id="lopd" title="Fitxers amb dades de caràcter personal"?>
+<?taglib uri="/WEB-INF/tld/web/core.dsp.tld" prefix="c" ?>
+<?init class="es.caib.seycon.ng.web.CheckPermisos" arg0="lopd" ?>
+<?component name="input_criteri" macro-uri="/comu/input_criteri.zul"?>
+<?component name="input_dada" macro-uri="/comu/input_dada.zul"?>
+<?component name="input_etiqueta" macro-uri="/comu/input_etiqueta.zul"?>
+<zk xmlns:h="http://www.w3.org/1999/xhtml">
+
+	<style src="~./styles/estil.css"/>
+
+	<datamodel id="model" rootNode="fitxers" src="addon/lopd/descriptorFitxer.xml"/>
+	
+	<zscript src="/comu/netejaCriteris.zul"/>
+
+	<zscript>
+		<![CDATA[
+			fileres = es.caib.seycon.ng.web.Custom.FILERES;
+			fileresO = es.caib.seycon.ng.web.Custom.FILERES_OBRIR;
+			try
+			{
+				es.caib.zkib.zkiblaf.Application.setTitle(org.zkoss.util.resource
+					.Labels.getLabel("lopd.Titol"));
+			}
+			catch (Exception ex){}
+			
+			queryWindowMin = "75px";
+			queryWindowMax = "115px";
+			
+			import es.caib.seycon.ng.utils.AutoritzacionsUsuari;
+			canCreateLopd = AutoritzacionsUsuari.hasCreateLopd();
+			canUpdateLopd = AutoritzacionsUsuari.hasUpdateLopd();
+			canDeleteLopd = AutoritzacionsUsuari.hasDeleteLopd();
+			canQueryLopd = AutoritzacionsUsuari.hasQueryLopd();
+			canModifyLopd = canCreateLopd || canUpdateLopd;
+			
+			mode = "query"; 
+			view_altres = false;
+			model.getVariables().declareVariable("queryEnabled", false);
+			
+			queryEnabled = false;
+			retrySearch = false;
+			
+			if (canQueryLopd) 
+				model.getJXPathContext().getValue("/conselleria").refresh();
+			
+			void populateDetails ()
+			{
+				mode = "query";
+			}
+			
+			// Method to obtain the parameters to search process
+			java.util.Map getSearchParameters()
+			{
+				java.util.Map searchValues = new java.util.HashMap();
+				
+				id = null;
+				nom = esquema.getFellow("queryWindow")
+					.getFellow("queryNom").getFellow("textbox");
+				responsable = null;
+				conselleria = esquema.getFellow("queryWindow")
+					.getFellow("queryCon").getFellow("textbox");
+				//dg = esquema.getFellow("queryWindow").getFellow("queryWindowAltres").getFellow("queryDG").getFellow("textbox");
+				nivell = null;
+				registrat = esquema.getFellow("queryWindow")
+					.getFellow("queryWindowAltres")
+					.getFellow("queryReg").getFellow("textbox");
+				
+				// Check enable query
+				if ((nom.value.trim().length() == 0) &&
+						(conselleria.value.trim().length() == 0) && 
+						(registrat.value.trim().length() == 0))
+				{
+					queryEnabled = false;
+				}
+				
+				else
+				{
+					queryEnabled = true;
+				}
+				
+				// Add parameters to search
+				searchValues.put("nom", nom.value);
+				searchValues.put("conselleria", conselleria.value);
+				searchValues.put("registrat", registrat.value);
+				
+				return searchValues;
+			}
+	          
+			void search () 
+			{
+				java.util.Map lista = new java.util.HashMap();
+				
+				if (esquema.isCommitPending())
+				{
+					Missatgebox.avis (org.zkoss.util.resource
+							.Labels.getLabel("lopd.AbansConfirmar"), 
+									org.zkoss.util.resource.Labels.getLabel("lopd.CanvisPendents"));
+					return;
+				}
+				
+				if (!retrySearch)
+				{
+					lista = es.caib.seycon.ng.web.utils.
+						Autowildcards.replaceAsteriskChar(getSearchParameters());
+				}
+				
+				else
+				{
+					lista = es.caib.seycon.ng.web.utils.
+							Autowildcards.addPercentChar(getSearchParameters());
+				}
+				
+				for (String key : lista.keySet())
+				{
+					model.getVariables().declareVariable(key, lista.get(key));
+				}
+				
+				model.getVariables().declareVariable("queryEnabled", queryEnabled);
+				listbox =	esquema.getFellow("lista").getFellow("listbox");
+				if (queryEnabled)
+				{
+					model.getJXPathContext().getValue("/fitxer").refresh();
+					listbox.dataPath = "/model:/fitxer"; 
+				}
+				
+				if (listbox.getModel().getSize()==1)
+				{
+					listbox.renderAll();
+					Listitem elem = listbox.getItemAtIndex(0); 
+					if (elem != null)
+						listbox.setSelectedItem(elem);
+					
+					select();
+					retrySearch = false;
+				}
+				
+				else
+				{
+					if ((listbox.getModel().getSize() == 0) && !retrySearch)
+					{
+						retrySearch = true;
+						search();
+					}
+					
+					else
+					{
+						esquema.tancaDetalls(); //amaguem dades..
+						retrySearch = false;
+					}
+				}
+			}
+	             
+			void showAltres () 
+			{
+				if (view_altres==false) {
+					esquema.getFellow("queryWindow").setHeight(queryWindowMax); 
+					esquema.getFellow("queryWindow").getFellow("queryWindowAltres").setVisible(true);
+					esquema.getFellow("queryWindow").getFellow("img_altres").setSrc("~./img/fletxa-baix.gif");
+					view_altres = true;
+				} else {
+					esquema.getFellow("queryWindow").setHeight(queryWindowMin); 
+					esquema.getFellow("queryWindow").getFellow("queryWindowAltres").setVisible(false);
+					esquema.getFellow("queryWindow").getFellow("img_altres").setSrc("~./img/fletxa.gif");
+					view_altres = false;
+				}
+			}
+			
+			void select () 
+			{
+				if (esquema.getFellow("lista").getFellow("listbox").selectedItem != null && 
+					esquema.getFellow("lista").getFellow("listbox").selectedItem.value != null)
+					{
+						populateDetails ();
+						showDetall ();
+					}
+			}
+			
+			void showLista ()  
+			{
+				  esquema.getFellow("lista").getFellow("listbox").clearSelection();
+				  esquema.getFellow("lista").getFellow("listbox").setRows(fileresO);
+			}
+			
+			void showDetall () 
+			{
+				esquema.hideCriteris();
+				esquema.getFellow("lista").getFellow("listbox").setRows(5);
+				esquema.showFormulari();
+			}
+		]]>
+	</zscript>
+
+	<esquemavertical datamodel="/model" focusCriteri="queryNom" id="esquema" onHideFormulari="showLista()">
+		
+		<criteris height="${queryWindowMin}" id="queryWindow" onOK="search()" width="${amplaria}">
+		
+			 <hbox>
+				<input_criteri etiqueta="${c:l('lopd.zul.Nom')}" id="queryNom"/>
+				<imageclic onClick="search()" src="~./img/fletxa_cerca.gif"/>
+			</hbox>
+			<input_criteri etiqueta="${c:l('lopd.zul.Conselleria')}" id="queryCon"/>						
+			<separator spacing="2px"/>
+			<hbox> 
+				<input_etiqueta value="${c:l('lopd.zul.Altres')}"/>
+				<imageclic id="img_altres" onClick="showAltres()" src="~./img/fletxa.gif"/>
+			</hbox>
+			<separator spacing="2px"/>
+			<altres_criteris id="queryWindowAltres" visible="false">
+			<!-- <input_criteri etiqueta="${c:l('lopd.zul.DirecciaGeneral')}" id="queryDG"/>-->								
+				<input_criteri etiqueta="${c:l('lopd.zul.Registrat')}" id="queryReg"/>						
+			</altres_criteris>
+			<separator spacing="11px"/>
+		</criteris>
+
+		<navegador id="lista" width="${amplaria}">
+			<toolbar>
+				<insertbutton acces="${canCreateLopd}" listbox="/esquema/lista/listbox" onClick="showDetall()"/>
+				<deletebutton acces="${canDeleteLopd}" listbox="/esquema/lista/listbox"/>
+				<commitbutton datamodel="/model"/>
+				<undobutton datamodel="/model" listbox="/esquema/lista/listbox"/>
+				<listexporttoolbarbutton acces="${canQueryLopd}" listbox="/esquema/lista/listbox"/>
+			</toolbar>
+			<listbox autocommit="false" dataPath="/model:/fitxer" fixedLayout="true" height="96%" id="listbox" onClick="showDetall()" onSelect="select()" rows="${fileres}">
+				<listhead>
+					<listheader label="${c:l('lopd.zul.Nom')}" sort="auto" width="36%"/>
+					<!--  <listheader label="${c:l('lopd.zul.DirecciaGeneral-2')}" sort="auto" width="36%"/>-->					
+					<listheader label="${c:l('lopd.zul.Conselleria-2')}" sort="auto" width="28%"/>				
+				</listhead>
+				<dataitem bind=".">
+					<listcell bind="@nom"/>
+					<!-- <listcell bind="@direccioGeneral"/>-->					
+					<listcell bind="@conselleria"/>
+				</dataitem>
+			</listbox>
+		</navegador>
+
+		<detalls id="dades" width="${amplaria}">
+			<zscript>
+				void onChangeDades()
+				{
+					try {													
+						ds = form.getDataSource(); 
+						ctx =  ds.getJXPathContext(); 
+						registre = ctx.getValue("/");						
+						form.getFellow("detall_nom").getFellow("dada").setDisabled(!registre.isNew());
+					} catch (Exception e) {
+						form.getFellow("detall_nom").getFellow("dada").setDisabled(true);
+					}
+				}
+			</zscript>		
+			<form dataPath="/esquema/lista/listbox:/." id="form" onChangeXPath="onChangeDades()" width="99%">
+				<attribute name="onActualitza">
+					if (event.getData() instanceof String) {
+						dada = (String)event.getData();
+					} else {
+						dada = (String)(event.getData()[0]);
+					}	
+					camp = (DataTextbox) form.getFellow(idActualitza).getFellow("dada");
+					camp.setValue(dada);				
+				</attribute>									
+				<tabbox id="tabboxAA" width="${amplaria2}">
+					<tabs>
+						<tab label="${c:l('lopd.zul.DadesGenerals')}"/>
+						<tab label="${c:l('lopd.zul.Responsables')}"/>
+						<tab label="${c:l('lopd.zul.DadesAPD')}"/>
+						<tab label="${c:l('lopd.zul.Observacions')}"/>
+					</tabs>
+					<tabpanels>
+						<tabpanel>
+							<grid fixedLayout="true">
+								<columns>
+									<column width="100px"/>
+									<column width="580px"/>
+								</columns>
+								<rows>
+									<row>
+										<input_etiqueta value="${c:l('lopd.zul.Nom-2')}"/>
+										<hbox>
+											<input_dada bind="@nom" id="detall_nom" width_custom="98%"/>
+											<label value="*"/>
+										</hbox>
+									</row>
+									<row>
+										<input_etiqueta value="${c:l('lopd.zul.Conselleria')}"/>
+										<hbox width="100%" widths="95%,5%">
+											<input_dada bind="@conselleria" id="detall_conselleria" lectura="${!canModifyLopd}" width_custom="95%"/>
+											<imageclic src="~./img/grup.gif">
+												<attribute name="onClick">
+													if (canModifyLopd) {
+														idActualitza ="detall_conselleria";
+														desktop.getPage("grupsLlista").setAttribute("tipus","");  <!-- Llevat conselleria de valor de tipus -->
+														desktop.getPage("grupsLlista").setAttribute("llistaObsolets",false);
+														Events.postEvent	("onInicia",desktop.getPage("grupsLlista").getFellow("esquemaLlista"),form);
+													}
+												</attribute>
+											</imageclic>
+										</hbox>										
+									</row>	
+								<!--  <row>
+										<input_etiqueta value="${c:l('lopd.zul.DGoEntitat')}"/>
+										<hbox width="100%" widths="95%,5%">
+											<input_dada bind="@direccioGeneral" id="detall_direccioGeneral" lectura="${!canModifyLopd}" width_custom="95%"/>
+											<imageclic src="~./img/grup.gif">
+												<attribute name="onClick">
+													if (canModifyLopd) {
+														idActualitza ="detall_direccioGeneral";
+														conselleria = form.getFellow("detall_conselleria").getFellow("dada").getValue();
+														desktop.getPage("grupsLlista").setAttribute("tipus","dg");
+														desktop.getPage("grupsLlista").setAttribute("conselleria",conselleria);
+														desktop.getPage("grupsLlista").setAttribute("llistaObsolets",false);														
+														Events.postEvent	("onInicia",desktop.getPage("grupsLlista").getFellow("esquemaLlista"),form);
+													}
+												</attribute>
+											</imageclic>
+										</hbox>																
+									</row>	-->																
+									<row>
+										<input_etiqueta value="${c:l('lopd.zul.Nivell')}"/>
+										<listbox bind="@nivell" disabled="${!canModifyLopd}" mold="select" style="font-size: 10px">
+											<listitem label="BÁSICO" value="BÁSICO"/>
+											<listitem label="MEDIO" value="MEDIO"/>
+											<listitem label="ALTO" value="ALTO"/>
+										</listbox>
+									</row>
+									<row>
+										<input_etiqueta value="${c:l('lopd.zul.Responsable')}"/>
+										<hbox width="100%" widths="95%,1%,*">
+											<input_dada bind="@responsable" id="detall_responsable" lectura="${!canModifyLopd}" width_custom="95%"/>
+											<label value="*"/>
+											<imageclic src="~./img/grup.gif">
+												<attribute name="onClick">											
+													if (canModifyLopd) {
+														idActualitza ="detall_responsable";
+														Events.postEvent	("onInicia",desktop.getPage("usuarisLlista").getFellow("esquemaLlista"),form);
+													}
+												</attribute>
+											</imageclic>
+										</hbox>										
+									</row>
+									<row>
+										<input_etiqueta value="${c:l('lopd.zul.Finalitat')}"/>
+										<!-- <input_dada bind="@finalitat" width_custom="98%" rows_custom="2" sclass="textbox" lectura="${!canModifyLopd}"/> -->
+										<textbox bind="@finalitat" onChange="" readonly="${!canModifyLopd}" rows="2" style="font-family: Arial; font-size: 12px; font-weight: normal; border: 1px solid #7F9196" width="98%"/>
+									</row>
+									<row>
+										<input_etiqueta value="${c:l('lopd.zul.Sistdinformacia')}"/>
+										<!-- <input_dada bind="@sistema" rows_custom="2" width_custom="98%" sclass="textbox" lectura="${!canModifyLopd}"/> -->
+										<textbox bind="@sistema" onChange="" readonly="${!canModifyLopd}" rows="2" style="font-family: Arial; font-size: 12px; font-weight: normal; border: 1px solid #7F9196" width="98%"/>
+									</row>																														
+								</rows>
+							</grid>
+						</tabpanel>
+						<tabpanel>
+							<grid fixedLayout="true" id="responsables">
+								<columns>
+									<column width="100px"/>
+									<column width="580px"/>
+								</columns>
+								<rows>
+									<row>
+										<input_etiqueta value="${c:l('lopd.zul.ResponsabledelFitxer')}"/>
+										<textbox bind="@responsable" readonly="true" sclass="textbox" width="98%"/>
+									</row>
+									<row>
+										<input_etiqueta value="${c:l('lopd.zul.ResponsablesdeSegure')}"/>
+										<vbox width="100%">
+											<grid dataPath="/responsableOrganitzatiu" fixedLayout="true" id="gridRespOrg" width="380px">
+												<attribute name="onActualitza">
+													dada = (String)(event.getData()[0]);
+													modelProxy = (es.caib.zkib.binder.list.FullModelProxy) gridRespOrg.getModel();
+
+													ds = gridRespOrg.getDataSource(); 
+													ctx =  ds.getJXPathContext();
+													xpath = gridRespOrg.getXPath() + "[@codiUsuari = '" + dada + "']";
+													boolean jaExisteix = true;
+													try{
+														valor = ctx.getValue(xpath);
+													}catch(Exception e){
+														jaExisteix = false;
+													}	
+													if(jaExisteix){
+														Missatgebox.avis(String.format(org.zkoss.util.resource.Labels.getLabel("lopd.UsuariAssignat"), new Object [] {dada}),
+																		org.zkoss.util.resource.Labels.getLabel("lopd.ErrorInsertar"));
+													}else{			
+														position = modelProxy.newInstance();
+														ds = gridRespOrg.getDataSource(); 
+														ctx =  ds.getJXPathContext(); 
+														xpath = gridRespOrg.getXPath() + modelProxy.getBind(position); 
+														pointer =ctx.createPath (xpath);
+														ctx2 = ctx.getRelativeContext(pointer);
+												
+														dsFitxer = form.getDataSource(); 
+														ctxFitxer =  dsFitxer.getJXPathContext(); 
+														idFitxer = ctxFitxer.getValue("@id");
+														nomFitxer = ctxFitxer.getValue("@nom");
+														<!-- direccioGeneral = ctxFitxer.getValue("@direccioGeneral");-->
+														
+														ctx2.setValue("@idFitxer", idFitxer);
+														ctx2.setValue("@nomFitxer", nomFitxer);		
+														<!-- ctx2.setValue("@direccioGeneralFitxer", direccioGeneral);-->
+														ctx2.setValue("@nomComplertUsuari", event.getData()[1]);
+					
+														ctx2.setValue("@codiUsuari", dada);
+														pointer.invalidate ();			
+													}				
+												</attribute>
+												<columns>
+													<column label="${c:l('lopd.zul.Codi')}" width="100px"/>
+													<column label="${c:l('lopd.zul.Nom')}" width="250px"/>
+													<column label="${c:l('lopd.zul.')}" width="30px"/>
+												</columns>
+												<datarow>
+													<label bind="@codiUsuari"/>
+													<label bind="@nomComplertUsuari"/>
+													<imageclic align="right" src="~./img/list-remove.gif">
+														<attribute name="onClick">
+															if (canModifyLopd) {
+																dataRow = self.getParent();
+																xpath = dataRow.getXPath();
+																dataSource = gridRespOrg.getDataSource();
+																context = dataSource.getJXPathContext();
+																Missatgebox.confirmaOK_CANCEL(org.zkoss.util.resource.Labels.getLabel("lopd.SegurBorra"),
+																	org.zkoss.util.resource.Labels.getLabel("lopd.Borra"),
+																	new EventListener() {
+																		public void onEvent(Event evt) {
+																			if ("onOK".equals(evt.getName())) { 
+																				context.removePath(xpath);														
+				           													}
+				            										    }
+				            									});
+															}
+														</attribute>														
+													</imageclic>											
+												</datarow>
+											</grid>
+											<button disabled="${!canModifyLopd}" image="~./img/list-add.gif" label="${c:l('lopd.zul.Afegeixnou')}">
+												<attribute name="onClick">																												 
+													Events.postEvent	("onInicia",desktop.getPage("usuarisLlista").getFellow("esquemaLlista"), gridRespOrg);
+												</attribute>
+											</button>												
+										</vbox>
+									</row>
+									<row>
+										<input_etiqueta value="${c:l('lopd.zul.AdministradorsdeSegu')}"/>
+										<vbox width="100%">
+											<grid dataPath="/administradorOrganitzatiu" fixedLayout="true" id="gridAdmOrg" width="380px">
+												<attribute name="onActualitza">
+													dada = (String)(event.getData()[0]);
+													modelProxy = (es.caib.zkib.binder.list.FullModelProxy) gridAdmOrg.getModel();
+
+													ds = gridAdmOrg.getDataSource(); 
+													ctx =  ds.getJXPathContext();
+													xpath = gridAdmOrg.getXPath() + "[@codiUsuari = '" + dada + "']";
+													boolean jaExisteix = true;
+													try{
+														valor = ctx.getValue(xpath);
+													}catch(Exception e){
+														jaExisteix = false;
+													}	
+													if(jaExisteix){
+														Missatgebox.error(String.format(org.zkoss.util.resource.Labels.getLabel("lopd.UsuariAssignat"), new Object [] {dada}),
+																		org.zkoss.util.resource.Labels.getLabel("lopd.ErrorInsertar"));
+													}else{			
+														position = modelProxy.newInstance();
+														ds = gridAdmOrg.getDataSource(); 
+														ctx =  ds.getJXPathContext(); 
+														xpath = gridAdmOrg.getXPath() + modelProxy.getBind(position); 
+														pointer =ctx.createPath (xpath);
+														ctx2 = ctx.getRelativeContext(pointer);
+												
+														dsFitxer = form.getDataSource(); 
+														ctxFitxer =  dsFitxer.getJXPathContext(); 
+														idFitxer = ctxFitxer.getValue("@id");
+														nomFitxer = ctxFitxer.getValue("@nom");
+														<!-- direccioGeneral = ctxFitxer.getValue("@direccioGeneral");-->
+														
+														ctx2.setValue("@idFitxer", idFitxer);
+														ctx2.setValue("@nomFitxer", nomFitxer);		
+														<!-- ctx2.setValue("@direccioGeneralFitxer", direccioGeneral);-->
+														ctx2.setValue("@nomComplertUsuari", event.getData()[1]);
+					
+														ctx2.setValue("@codiUsuari", dada);
+														pointer.invalidate ();			
+													}				
+												</attribute>
+												<columns>
+													<column label="${c:l('lopd.zul.Codi')}" width="100px"/>
+													<column label="${c:l('lopd.zul.Nom')}" width="250px"/>
+													<column label="${c:l('lopd.zul.')}" width="30px"/>
+												</columns>
+												<datarow>
+													<label bind="@codiUsuari"/>
+													<label bind="@nomComplertUsuari"/>
+													<imageclic align="right" src="~./img/list-remove.gif">
+														<attribute name="onClick">
+															if (canModifyLopd) {
+																dataRow = self.getParent();
+																xpath = dataRow.getXPath();
+																dataSource = gridAdmOrg.getDataSource();
+																context = dataSource.getJXPathContext();
+																Missatgebox.confirmaOK_CANCEL(org.zkoss.util.resource.Labels.getLabel("lopd.SegurBorra"),
+																	org.zkoss.util.resource.Labels.getLabel("lopd.Borra"),
+																	new EventListener() {
+																		public void onEvent(Event evt) {
+																			if ("onOK".equals(evt.getName())) { 
+																				context.removePath(xpath);														
+				           													}
+				            										    }
+				            									});
+															}
+														</attribute>														
+													</imageclic>											
+												</datarow>
+											</grid>
+											<button disabled="${!canModifyLopd}" image="~./img/list-add.gif" label="${c:l('lopd.zul.Afegeixnou')}">
+												<attribute name="onClick">																												 
+													Events.postEvent	("onInicia",desktop.getPage("usuarisLlista").getFellow("esquemaLlista"), gridAdmOrg);
+												</attribute>
+											</button>												
+										</vbox>										
+									</row>																	
+									<row>
+										<input_etiqueta value="${c:l('lopd.zul.ResponsabledeSeguret')}"/>
+										<hbox width="100%" widths="95%,1%,*">
+											<input_dada bind="@responsableSeguretatTecnic" id="detall_responsableSeguretatTecnic" lectura="${!canModifyLopd}" width_custom="98%"/>
+											<label value="*"/>
+											<imageclic src="~./img/grup.gif">
+												<attribute name="onClick">											
+													if (canModifyLopd) {
+														idActualitza ="detall_responsableSeguretatTecnic";
+														Events.postEvent	("onInicia",desktop.getPage("usuarisLlista").getFellow("esquemaLlista"),form);
+													}
+												</attribute>
+											</imageclic>
+										</hbox>											
+									</row>																	
+								</rows>
+							</grid>
+						</tabpanel>						
+						<tabpanel>
+							<grid fixedLayout="true">
+								<columns>
+									<column width="100px"/>
+									<column width="580px"/>
+								</columns>				
+								<rows>
+									<row>
+										<input_etiqueta value="${c:l('lopd.zul.Registrat?')}"/>
+										<checkbox bind="@registratAPD" disabled="${!canModifyLopd}" id="registrat" onCheck=""/>
+									</row>								
+									<row>
+										<input_etiqueta value="${c:l('lopd.zul.CodiAPD')}"/>
+										<input_dada bind="@codiRegistreAPD" lectura="${!canModifyLopd}" width_custom="20%"/>
+									</row>
+									<row>
+										<input_etiqueta value="${c:l('lopd.zul.NomAPD')}"/>
+										<input_dada bind="@nomRegistreAPD" lectura="${!canModifyLopd}" width_custom="98%"/>
+									</row>
+									<row>
+										<input_etiqueta value="${c:l('lopd.zul.Disposicialegal')}"/>
+										<input_dada bind="@disposicioLegal" lectura="${!canModifyLopd}" width_custom="98%"/>
+									</row>
+									<row>
+										<input_etiqueta value="${c:l('lopd.zul.Dataregistre')}"/>
+										<datebox bind="@dataRegistre" disabled="${!canModifyLopd}" format="dd/MM/yyyy" id="dataRegistreAPD" width="20%"/>
+									</row>									
+									<row>
+										<input_etiqueta value="${c:l('lopd.zul.Databaixa')}"/>
+										<datebox bind="@dataBaixaAPD" disabled="${!canModifyLopd}" format="dd/MM/yyyy" id="databaixa" width="20%"/>
+									</row>
+									<row>
+										<input_etiqueta value="${c:l('lopd.zul.Motiubaixa')}"/>
+										<input_dada bind="@motiuBaixa" lectura="${!canModifyLopd}" width_custom="98%"/>
+									</row>										
+								</rows>
+							</grid>
+						</tabpanel>
+							<tabpanel>
+								<!-- <input_dada rows_custom="10" cols_custom="60" bind="@observacions" width_custom="98%" lectura="${!canModifyLopd}"/> -->
+								<textbox bind="@observacions" cols="60" onChange="" readonly="${!canModifyLopd}" rows="10" style="font-family: Arial; font-size: 12px; font-weight: normal; border: 1px solid #7F9196" width="98%"/>
+							</tabpanel>
+						</tabpanels>
+					</tabbox>			
+					<separator/>						
+					<tabbox>
+						<tabs>
+							<tab label="${c:l('lopd.zul.Dadesidentificatives')}"/>
+							<tab label="${c:l('lopd.zul.Dadespersonals')}"/>
+							<tab label="${c:l('lopd.zul.Dadesdecircumstancie')}"/>
+							<tab label="${c:l('lopd.zul.Dadesacadamiquesipro')}"/>
+							<tab label="${c:l('lopd.zul.Dadeslaborals')}"/>						
+							<tab label="${c:l('lopd.zul.Dadesdinformaciacom')}"/>						
+							<tab label="${c:l('lopd.zul.Dadesfinanceres')}"/>						
+							<tab label="${c:l('lopd.zul.Dadesdetransaccions')}"/>						
+							<tab label="${c:l('lopd.zul.Dadesdinfraccions')}"/>
+						</tabs>
+						<tabpanels>
+							<!-- <tabpanel><input_dada bind="@dadesIdentificatives" rows_custom="10" cols_custom="60" width_custom="98%" lectura="${!canModifyLopd}"/></tabpanel>
+							<tabpanel><input_dada bind="@dadesPersonals" rows_custom="10" cols_custom="60" width_custom="98%" lectura="${!canModifyLopd}"/></tabpanel>
+							<tabpanel><input_dada bind="@dadesSocials" rows_custom="10" cols_custom="60" width_custom="98%" lectura="${!canModifyLopd}"/></tabpanel>
+							<tabpanel><input_dada bind="@dadesAcademiquesProfessionals" rows_custom="10" cols_custom="60" width_custom="98%" lectura="${!canModifyLopd}"/></tabpanel>
+							<tabpanel><input_dada bind="@dadesLaborals" rows_custom="10" cols_custom="60" width_custom="98%" lectura="${!canModifyLopd}"/></tabpanel>
+							<tabpanel><input_dada bind="@dadesComercials" rows_custom="10" cols_custom="60" width_custom="98%" lectura="${!canModifyLopd}"/></tabpanel>
+							<tabpanel><input_dada bind="@dadesFinanceres" rows_custom="10" cols_custom="60" width_custom="98%" lectura="${!canModifyLopd}"/></tabpanel>
+							<tabpanel><input_dada bind="@dadesTransaccionals" rows_custom="10" cols_custom="60" width_custom="98%" lectura="${!canModifyLopd}"/></tabpanel>
+							<tabpanel><input_dada bind="@dadesInfraccions" rows_custom="10" cols_custom="60" width_custom="98%" lectura="${!canModifyLopd}"/></tabpanel> -->
+							<tabpanel><textbox bind="@dadesIdentificatives" cols="60" onChange="" readonly="${!canModifyLopd}" rows="10" style="font-family: Arial; font-size: 12px; font-weight: normal; border: 1px solid #7F9196" width="98%"/>	</tabpanel>
+							<tabpanel><textbox bind="@dadesPersonals" cols="60" onChange="" readonly="${!canModifyLopd}" rows="10" style="font-family: Arial; font-size: 12px; font-weight: normal; border: 1px solid #7F9196" width="98%"/>	</tabpanel>
+							<tabpanel><textbox bind="@dadesSocials" cols="60" onChange="" readonly="${!canModifyLopd}" rows="10" style="font-family: Arial; font-size: 12px; font-weight: normal; border: 1px solid #7F9196" width="98%"/>	</tabpanel>
+							<tabpanel><textbox bind="@dadesAcademiquesProfessionals" cols="60" onChange="" readonly="${!canModifyLopd}" rows="10" style="font-family: Arial; font-size: 12px; font-weight: normal; border: 1px solid #7F9196" width="98%"/>	</tabpanel>
+							<tabpanel><textbox bind="@dadesLaborals" cols="60" onChange="" readonly="${!canModifyLopd}" rows="10" style="font-family: Arial; font-size: 12px; font-weight: normal; border: 1px solid #7F9196" width="98%"/>	</tabpanel>
+							<tabpanel><textbox bind="@dadesComercials" cols="60" onChange="" readonly="${!canModifyLopd}" rows="10" style="font-family: Arial; font-size: 12px; font-weight: normal; border: 1px solid #7F9196" width="98%"/>	</tabpanel>
+							<tabpanel><textbox bind="@dadesFinanceres" cols="60" onChange="" readonly="${!canModifyLopd}" rows="10" style="font-family: Arial; font-size: 12px; font-weight: normal; border: 1px solid #7F9196" width="98%"/>	</tabpanel>
+							<tabpanel><textbox bind="@dadesTransaccionals" cols="60" onChange="" readonly="${!canModifyLopd}" rows="10" style="font-family: Arial; font-size: 12px; font-weight: normal; border: 1px solid #7F9196" width="98%"/>	</tabpanel>
+							<tabpanel><textbox bind="@dadesInfraccions" cols="60" onChange="" readonly="${!canModifyLopd}" rows="10" style="font-family: Arial; font-size: 12px; font-weight: normal; border: 1px solid #7F9196" width="98%"/>	</tabpanel>
+						</tabpanels>						
+					</tabbox>
+			</form>
+		</detalls>
+	
+	</esquemavertical>
+
+	<include src="/usuarisllista.zul"/>
+	<include src="/grupsllista.zul"/>
+	
+</zk>
