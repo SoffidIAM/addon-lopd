@@ -6,12 +6,12 @@
 		<artifactId>addons</artifactId>
 		<version>1.0.0</version>
 	</parent>
-	<groupId>com.soffid.iam.addon.lopd</groupId>
+	<groupId>com.soffid.iam.addon.gdpr</groupId>
 	<artifactId>root</artifactId>
 	<packaging>pom</packaging>
-	<name>Lopd</name>
+	<name>Data Privacy ADDON</name>
 	<version>1.0.2-SNAPSHOT</version>
-	<description>SOFFID IAM Lopd addon</description>
+	<description>SOFFID IAM GPDR addon</description>
 	<prerequisites>
 		<maven>2.0.1</maven>
 	</prerequisites>
@@ -24,8 +24,8 @@
 		</developer>
 	</developers>
 	<scm>
-		<connection>scm:git:ssh://git@stash.dev.lab:7999/IAM/console.git</connection>
-		<developerConnection>scm:git:ssh://git@stash.dev.lab:7999/IAM/console.git</developerConnection>
+		<connection>scm:git:ssh://git@stash.dev.lab:7999/IAM/addon-gdpr.git</connection>
+		<developerConnection>scm:git:ssh://git@stash.dev.lab:7999/IAM/addon-gdpr.git</developerConnection>
 	  <tag>HEAD</tag>
   </scm>
 	<build>
