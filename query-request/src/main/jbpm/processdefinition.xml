@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process-definition 
+  xmlns="urn:jbpm.org:jpdl-3.3"
+  name="Privacy data query">
+   <swimlane name="iniciador">
+		<assignment expression="variable(iniciador)"></assignment>
+	</swimlane>
+
+
+	<start-state name="Inici">
+		<transition to="Request"></transition>
+	</start-state>
+
+
+	<task-node name="Request">
+		<task name="Enter request">
+			<assignment expression="previous"></assignment>
+		</task>
+		<transition to="Dispatch to managers" name="Dispatch">
+			<action name="Alta usuario externo" class="com.soffid.bpm.authoritativechange.handler.AltaExternoHandler"></action>
+			<script name="crear swimlane inicial">
+				executionContext.setVariable (&quot;iniciador&quot;, 
+   executionContext. jbpmContext .actorId);
+			</script>
+		</transition>
+	</task-node>
+
+	<task-node name="Fullfill">
+		<task name="Personal data lookup for #{citizenName} on #{file}" duedate="3 days" notify="true">
+			<description>
+				#{citizenName} has requested to query its data for #{file}
+
+You should gather it now.
+			</description>
+			<assignment class="com.soffid.bpm.authoritativechange.handler.AppOwnerAssignmentHandler"></assignment>
+		</task>
+		<transition to="Dispatch to managers" name="Answer">
+		</transition>
+	</task-node>
+
+	<node name="Dispatch to managers">
+		<action name="Create auhtorization processes" class="com.soffid.bpm.authoritativechange.handler.ManagerHandler"></action>
+		<transition to="Fullfill" name="Dispatch"></transition>
+		<transition to="Generate report" name="Continue"></transition>
+	</node>
+
+	<task-node name="Generate report">
+		<task name="Generate privacy report for #{citizenName}" swimlane="iniciador" notify="true">
+			<description>
+				Every privacy data has been finished.
+
+You should now generate a report and send it to #{citizenName}
+			</description>
+		</task>
+		<transition to="End" name="End"></transition>
+	</task-node>
+
+
+	<end-state name="End"></end-state>
+</process-definition>
