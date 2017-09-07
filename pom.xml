@@ -24,8 +24,8 @@
 		</developer>
 	</developers>
 	<scm>
-		<connection>scm:git:ssh://git@stash.dev.lab:7999/IAM/addon-gdpr.git</connection>
-		<developerConnection>scm:git:ssh://git@stash.dev.lab:7999/IAM/addon-gdpr.git</developerConnection>
+		<connection>scm:git:ssh://git@stash.dev.lab:7999/iam2/addon-gdpr.git</connection>
+		<developerConnection>scm:git:ssh://git@stash.dev.lab:7999/iam2/addon-gdpr.git</developerConnection>
 	  <tag>root-1.0.2</tag>
   </scm>
 	<build>
