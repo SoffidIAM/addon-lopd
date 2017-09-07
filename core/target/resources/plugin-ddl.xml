@@ -1,0 +1,99 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<database name='Soffid'>
+
+	<!-- com.soffid.iam.addons.lopd.model.RolFitxerEntity -->
+
+	<table name='SCL_ROLFIT'>
+		<column name='RLF_ID' type='BIGINT' notNull='true' primaryKey='true' autoIncrement='false'/>
+		<column name='RLF_IDFIT' type='BIGINT' notNull='true'/>
+		<column name='RLF_IDROL' type='BIGINT' notNull='true'/>
+	</table>
+	<foreignKey name='SCL_ROLFIT_FK_RLF_IDFIT' table='SCL_ROLFIT' foreignTable='SCL_FITXER'> 
+		<column name='RLF_IDFIT'/>
+		<foreignColumn name='FIT_ID'/>
+	</foreignKey>
+	<foreignKey name='SCL_ROLFIT_FK_RLF_IDROL' table='SCL_ROLFIT' foreignTable='SC_ROLES'> 
+		<column name='RLF_IDROL'/>
+		<foreignColumn name='ROL_ID'/>
+	</foreignKey>
+
+	<!-- com.soffid.iam.addons.lopd.model.AdministradorSeguretatOrganitzatiuFitxerEntity -->
+
+	<table name='SCL_ASOFIT'>
+		<column name='ASO_IDFIT' type='BIGINT' notNull='true'/>
+		<column name='ASO_IDUSU' type='BIGINT' notNull='true'/>
+		<column name='ASO_ID' type='BIGINT' notNull='true' primaryKey='true' autoIncrement='false'/>
+	</table>
+	<foreignKey name='SCL_ASOFIT_FK_ASO_IDFIT' table='SCL_ASOFIT' foreignTable='SCL_FITXER'> 
+		<column name='ASO_IDFIT'/>
+		<foreignColumn name='FIT_ID'/>
+	</foreignKey>
+	<foreignKey name='SCL_ASOFIT_FK_ASO_IDUSU' table='SCL_ASOFIT' foreignTable='SC_USUARI'> 
+		<column name='ASO_IDUSU'/>
+		<foreignColumn name='USU_ID'/>
+	</foreignKey>
+
+	<!-- com.soffid.iam.addons.lopd.model.ResponsableSeguretatOrganitzatiuFitxerEntity -->
+
+	<table name='SCL_RSOFIT'>
+		<column name='RES_IDFIT' type='BIGINT' notNull='true'/>
+		<column name='RES_IDUSU' type='BIGINT' notNull='true'/>
+		<column name='RES_ID' type='BIGINT' notNull='true' primaryKey='true' autoIncrement='false'/>
+	</table>
+	<foreignKey name='SCL_RSOFIT_FK_RES_IDFIT' table='SCL_RSOFIT' foreignTable='SCL_FITXER'> 
+		<column name='RES_IDFIT'/>
+		<foreignColumn name='FIT_ID'/>
+	</foreignKey>
+	<foreignKey name='SCL_RSOFIT_FK_RES_IDUSU' table='SCL_RSOFIT' foreignTable='SC_USUARI'> 
+		<column name='RES_IDUSU'/>
+		<foreignColumn name='USU_ID'/>
+	</foreignKey>
+
+	<!-- com.soffid.iam.addons.lopd.model.FitxerEntity -->
+
+	<table name='SCL_FITXER'>
+		<column name='FIT_ID' type='BIGINT' notNull='true' primaryKey='true' autoIncrement='false'/>
+		<column name='FIT_NOM' type='VARCHAR' length='256' notNull='true'/>
+		<column name='FIT_FIN' type='VARCHAR' length='256' notNull='false'/>
+		<column name='FIT_NIVEL' type='VARCHAR' length='256' notNull='false'/>
+		<column name='FIT_SIST' type='VARCHAR' length='256' notNull='false'/>
+		<column name='FIT_REGAPD' type='VARCHAR' length='256' notNull='true'/>
+		<column name='FIT_NOMAPD' type='VARCHAR' length='256' notNull='false'/>
+		<column name='FIT_DATAPD' type='DATE' notNull='false'/>
+		<column name='FIT_DISLEG' type='VARCHAR' length='256' notNull='false'/>
+		<column name='FIT_DCARID' type='VARCHAR' length='256' notNull='false'/>
+		<column name='FIT_DCARPE' type='VARCHAR' length='256' notNull='false'/>
+		<column name='FIT_DCIRSO' type='VARCHAR' length='256' notNull='false'/>
+		<column name='FIT_DACPRO' type='VARCHAR' length='256' notNull='false'/>
+		<column name='FIT_DEMPLE' type='VARCHAR' length='256' notNull='false'/>
+		<column name='FIT_DINCOR' type='VARCHAR' length='256' notNull='false'/>
+		<column name='FIT_DECFIN' type='VARCHAR' length='256' notNull='false'/>
+		<column name='FIT_DTRANS' type='VARCHAR' length='256' notNull='false'/>
+		<column name='FIT_DCOMIN' type='VARCHAR' length='256' notNull='false'/>
+		<column name='FIT_CODAPD' type='VARCHAR' length='256' notNull='false'/>
+		<column name='FIT_OBS' type='VARCHAR' length='256' notNull='false'/>
+		<column name='FIT_MOTBAI' type='VARCHAR' length='256' notNull='false'/>
+		<column name='FIT_DATBAI' type='DATE' notNull='false'/>
+		<column name='FIT_IDRESP' type='BIGINT' notNull='true'/>
+		<column name='FIT_IDDG' type='BIGINT' notNull='false'/>
+		<column name='FIT_IDRSTEC' type='BIGINT' notNull='true'/>
+	</table>
+	<foreignKey name='SCL_FITXER_FK_FIT_IDRESP' table='SCL_FITXER' foreignTable='SC_USUARI'> 
+		<column name='FIT_IDRESP'/>
+		<foreignColumn name='USU_ID'/>
+	</foreignKey>
+	<foreignKey name='SCL_FITXER_FK_FIT_IDDG' table='SCL_FITXER' foreignTable='SC_GRUPS'> 
+		<column name='FIT_IDDG'/>
+		<foreignColumn name='GRU_ID'/>
+	</foreignKey>
+	<foreignKey name='SCL_FITXER_FK_FIT_IDRSTEC' table='SCL_FITXER' foreignTable='SC_USUARI'> 
+		<column name='FIT_IDRSTEC'/>
+		<foreignColumn name='USU_ID'/>
+	</foreignKey>
+	<table name='SC_SEQUENCE'>
+		<column name='SEQ_NEXT' type='BIGINT' notNull='true'/>
+		<column name='SEQ_CACHE' type='BIGINT' notNull='true'/>
+		<column name='SEQ_INCREMENT' type='BIGINT' notNull='true'/>
+	</table>
+
+</database>

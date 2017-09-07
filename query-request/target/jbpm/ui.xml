@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process>
+	<tag>1.0.0-SNAPSHOT</tag>
+	<type>AuthoritativeChange</type>
+	<roles>
+		<initiator>
+			<role name="SOFFID_ADMIN" />
+		</initiator>
+		<supervisor>
+			<role name="SOFFID_ADMIN" />
+		</supervisor>
+		<observer>
+			<role name="SOFFID_ADMIN" />
+		</observer>
+	</roles>
+	<task name="Enter request">
+		<file path="ui/request.zul" />
+	</task>
+	<task name="Personal data.*">
+		<file path="ui/fullfill.zul" />
+	</task>
+	<task name="Generate privacy.*">
+		<file path="ui/report.zul" />
+	</task>
+	<upgrade>
+		<process>
+			<tag>1.0.0-SNAPSHOT</tag>
+		</process>
+	</upgrade>	
+</process>

@@ -2,11 +2,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<parent>
 		<artifactId>root</artifactId>
-		<groupId>com.soffid.iam.addon.gpdr</groupId>
+		<groupId>com.soffid.iam.addon.gdpr</groupId>
 		<version>1.0.2-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>lopd-web</artifactId>
+	<artifactId>gdpr-web</artifactId>
 	<packaging>war</packaging>
 	<name>SEYCON Web</name>
 	<build>
@@ -69,13 +69,13 @@
 	<dependencies>
 		<dependency>
 			<groupId>${pom.groupId}</groupId>
-			<artifactId>lopd-common</artifactId>
+			<artifactId>gdpr-common</artifactId>
 			<version>${pom.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>${pom.groupId}</groupId>
-			<artifactId>lopd-core</artifactId>
+			<artifactId>gdpr-core</artifactId>
 			<version>${pom.version}</version>
 			<type>ejb</type>
 			<scope>provided</scope>
