@@ -8,7 +8,7 @@
   
 	<name>Authoritative change approval process</name>
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.soffid.iam.lopd.bpm</groupId>
+	<groupId>com.soffid.iam.gpdr.bpm</groupId>
 	<artifactId>lopd-query-request</artifactId>
 	<packaging>jbpm</packaging>
 	<version>1.0.0-SNAPSHOT</version>
