@@ -317,9 +317,9 @@
 									<row>
 										<input_etiqueta value="${c:l('lopd.zul.Nivell')}"/>
 										<listbox bind="@nivell" disabled="${!canModifyLopd}" mold="select" style="font-size: 10px">
-											<listitem label="BÁSICO" value="BÁSICO"/>
-											<listitem label="MEDIO" value="MEDIO"/>
-											<listitem label="ALTO" value="ALTO"/>
+											<listitem label="${c:l('lopd.zul.LOW')}" value="BÁSICO"/>
+											<listitem label="${c:l('lopd.zul.MEDIUM')}" value="MEDIO"/>
+											<listitem label="${c:l('lopd.zul.HIGH')}" value="ALTO"/>
 										</listbox>
 									</row>
 									<row>
