@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<root-container name="Privacy data query" width="1048" height="524">
+  <node name="Inici" x="16" y="35" width="140" height="40">
+    <edge>
+      <label x="5" y="-10"/>
+    </edge>
+  </node>
+  <node name="Request" x="28" y="143" width="132" height="36">
+    <edge>
+      <label x="-41" y="-39"/>
+      <bendpoint w1="0" h1="120" w2="-196" h2="-1"/>
+    </edge>
+  </node>
+  <node name="Fullfill" x="222" y="156" width="132" height="36">
+    <edge>
+      <label x="5" y="-10"/>
+      <bendpoint w1="80" h1="35" w2="2" h2="-58"/>
+    </edge>
+  </node>
+  <node name="Dispatch to managers" x="192" y="264" width="197" height="36">
+    <edge>
+      <label x="-32" y="-44"/>
+      <bendpoint w1="-86" h1="-39" w2="-8" h2="54"/>
+    </edge>
+    <edge>
+      <label x="-31" y="-18"/>
+    </edge>
+  </node>
+  <node name="Generate report" x="492" y="260" width="132" height="36">
+    <edge>
+      <label x="-22" y="-20"/>
+    </edge>
+  </node>
+  <node name="End" x="702" y="257" width="132" height="42"/>
+</root-container>

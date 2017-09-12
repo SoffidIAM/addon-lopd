@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zk xmlns="http://www.zkoss.org/2005/zul"
+	xmlns:h="http://www.w3.org/1999/xhtml"
+	xmlns:zk="http://www.zkoss.org/2005/zk"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.zkoss.org/2005/zul http://www.zkoss.org/2005/zul/zul.xsd">
+    <zscript><![CDATA[
+       com.soffid.bpm.authoritativechange.ui.ZulMessages msg = new com.soffid.bpm.authoritativechange.ui.ZulMessages();
+    ]]></zscript>
+	<task id="window" use="com.soffid.bpm.authoritativechange.ui.RequestWindow">
+		<grid id="grid">
+			<rows>
+				<row>
+					<label value="Requester"></label>
+					<label bind="@solicitante" id="requester"/>
+				</row>
+				<row>
+					<label value="Citizen name"></label>
+					<textbox bind="@citizenName" width="40em"/>
+				</row>
+				<row>
+					<label value="Email"></label>
+					<textbox bind="@citizenEmail"  width="40em"/>
+				</row>
+				<row>
+					<label value="Phone"></label>
+					<textbox bind="@citizenPhone"  width="40em"/>
+				</row>
+				<row>
+					<label value="Address"></label>
+					<textbox bind="@citizenAddress"  width="40em"/>
+				</row>
+				<row>
+					<label value="City"></label>
+					<textbox bind="@citizenCity"  width="40em"/>
+				</row>
+				<row>
+					<label value="Zip code"></label>
+					<textbox bind="@citizenZipCode"  width="10em"/>
+				</row>
+				<row>
+					<label value="Coutry"></label>
+					<textbox bind="@citizenCountry"  width="20em"/>
+				</row>
+				<row>
+					<label value="Delivery channel"></label>
+					<listbox bind="@citizenMethod" mold="select">
+						<listitem value="E" label="email"/>
+						<listitem value="P" label="phone"/>
+						<listitem value="M" label="phisical mail post"/>
+					</listbox>
+				</row>
+				<row>
+					<label value="Related files"></label>
+					<label/>
+				</row>
+			</rows>
+		</grid>
+	</task>
+</zk>

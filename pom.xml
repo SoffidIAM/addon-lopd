@@ -89,6 +89,7 @@
     <module>core</module>
     <module>web</module>
     <module>addon</module>
+    <module>query-request</module>
   </modules>
   <dependencies>
     <dependency>
