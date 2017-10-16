@@ -177,12 +177,12 @@ public class FitxerEntityDaoImpl extends
 		String unitatOrganitzativa = sourceVO.getConselleria();	//Afegit Rosa
 		//GrupEntity grupEntity = getGrupEntityDao().findByCodi(codiDireccioGeneral);
 		GrupEntity grupEntity = getGrupEntityDao().findByCodi(unitatOrganitzativa);	//Afegit Rosa
-		//if (grupEntity != null) {
+		if (grupEntity != null) {
 			targetEntity.setDireccioGeneral(grupEntity);
-		//} else {
-			//throw new SeyconException(String.format(Messages.getString("FitxerEntityDaoImpl.wrongGroup"),  //$NON-NLS-1$
-				//	codiDireccioGeneral));
-		//}
+		} else {
+			throw new SeyconException(String.format(Messages.getString("FitxerEntityDaoImpl.wrongGroup"),  //$NON-NLS-1$
+					unitatOrganitzativa));
+		}
 		String codiResponsable = sourceVO.getResponsable();
 		if (codiResponsable == null
 				|| codiResponsable.trim().compareTo("") == 0) { //$NON-NLS-1$
