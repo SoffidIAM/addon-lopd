@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
-<SoffidIAMPlugin xmlns="http://www.soffid.com/schema/iam-plugin-v1"> 
-	<name>Soffid Identity Lopd</name>
-	<version>${pom.version}</version>
-	<core name="Lopd common classes" resource="lopd-common-${pom.version}.jar"/>
-	<core name="Lopd core classes" resource="lopd-core-${pom.version}.jar"/>
-	<web name="Lopd web files" resource="lopd-web-${pom.version}.war"/>
-</SoffidIAMPlugin>
